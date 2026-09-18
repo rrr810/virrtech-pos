@@ -78,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(VERSION).then((cache) => cache.put(INDEX, copy));
           return res;
         })
-        .catch(() => caches.match(INDEX)),
+        .catch(async () => (await caches.match(INDEX)) || (await caches.match(new URL('./', self.location).href))),
     );
     return;
   }
