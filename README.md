@@ -41,7 +41,7 @@ runs in any modern browser.
 
 ```bash
 npm install          # dev deps only (ZXing + esbuild, used to regenerate the vendored decoder)
-npm test             # 74 automated tests (node:test + happy-dom, zero test frameworks)
+npm test             # 82 automated tests (node:test + happy-dom, zero test frameworks)
 npm start            # http://localhost:8080  (PORT=3000 to override)
 ```
 
@@ -76,8 +76,23 @@ first run; reset it anytime from **Settings → Demo data**.
   Apache-2.0, committed to the repo — **no CDN**).
 - Recognised products are added straight to the cart (vibrate + flash feedback,
   duplicates within 2.5 s are ignored).
-- Unknown barcodes open the product-registration form; once registered, the
-  barcode is remembered in the catalogue.
+- Unknown barcodes open the product-registration form immediately; once
+  registered, the barcode is remembered in the catalogue.
+- **Unknown-barcode auto-fill (online only):** while that form is open, the
+  app quietly asks the public Open Facts databases — in order **Open Food
+  Facts → Open Beauty Facts → Open Products Facts** — for a name, SKU and
+  category draft (`src/core/productLookup.js`):
+  - Name is composed as `"Brand product_name (quantity)"` (≤ 120 chars,
+    no duplicated brand/quantity), with a `generic_name` fallback.
+  - SKU is `AUTO-<last 6 barcode digits>`, bumped `-2`/`-3` on collision.
+  - Category comes from the first `en:` categories tag (dashes → spaces,
+    titleized, ≤ 40 chars).
+  - Only **empty** form fields are filled; a visible note says where the
+    data came from, and the shop always sets its own price and stock.
+  - **Prices are never fetched** — the shelf price belongs to the shop.
+  - Every failure mode (offline, 404, `status:0`, bad JSON, timeout, even a
+    fetch that ignores `AbortSignal`) resolves to `null`, so the manual
+    flow is never blocked or broken.
 - If the camera is denied, missing or the browser is unsupported, a clear
   message appears and **manual barcode entry is always available**.
 - Closing the scanner stops **all** camera tracks.
@@ -95,8 +110,11 @@ npm run icons               # regenerate the procedural PNG/SVG icons (dev only)
 ```
 
 Automated tests cover: money handling, barcode classification/checksums,
-product validation and search, cart stock rules, the checkout state machine
-(including idempotency and change), refunds (caps, statuses, stock restore),
+product validation and search, unknown-barcode auto-fill (name/SKU/category
+composition, truncation, SKU collision bumping, endpoint order, safe
+behaviour for offline/hanging/garbage input — all with a faked fetch, zero
+real network), cart stock rules, the checkout state machine (including
+idempotency and change), refunds (caps, statuses, stock restore),
 stock adjustments, receipt layout (42-char width, wrapping, disclaimer),
 daily reporting, and static wiring (every referenced asset, import and
 manifest entry exists; no CDN; no secret patterns; no `.env`).
@@ -137,6 +155,9 @@ without touching business logic or UI:
 - Money is stored as **integer KES minor units** (no float money anywhere).
 - All inputs are validated (form-level, business-rule-level, storage-level).
 - The scanner never transmits frames; manual entry and all data stay local.
+- Unknown-barcode auto-fill (online only) sends **the barcode alone** to the
+  public Open Facts APIs; the CSP in `index.html` restricts `connect-src` to
+  exactly those three hosts, and no prices or shop data are ever sent.
 - Print output and receipts carry the prototype / non-eTIMS disclaimer.
 
 ## Project layout
@@ -151,7 +172,8 @@ icons/                  generated PWA icons + SVG favicon
 src/
   main.js               bootstrap: nav, theme, connectivity, install
   core/                 pure business logic (money, barcodes, catalog,
-                        cart, checkout, refunds, inventory, receipt, sales, demo)
+                        cart, checkout, refunds, inventory, receipt, sales,
+                        demo, productLookup — unknown-barcode auto-fill)
   state/                db.js (IndexedDB) + store.js (app state & actions)
   scanner/              camera engine (native detector + ZXing fallback)
   ui/                   views: register, catalogue, sales, dashboard,

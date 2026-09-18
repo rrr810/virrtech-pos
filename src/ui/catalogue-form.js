@@ -10,24 +10,28 @@ export function openProductForm({ store, product = null, prefill = {}, onSaved }
   const editing = Boolean(product);
   const p = product ?? {};
   const bar = (prefill.barcode ?? p.barcode ?? '') || '';
+  const name = prefill.name ?? p.name ?? '';
+  const sku = prefill.sku ?? p.sku ?? '';
+  const category = prefill.category ?? p.category ?? '';
 
   const content = el(
     `<form data-product-form novalidate>
+      <p class="form-hint small lookup-note" data-lookup-note hidden></p>
       <div class="field">
         <label for="pf-name">Product name</label>
-        <input id="pf-name" data-field="name" value="${esc(p.name ?? '')}" maxlength="120" required
+        <input id="pf-name" data-field="name" value="${esc(name)}" maxlength="120" required
                placeholder="e.g. Mandi Rice (1kg)">
         <p class="field-error" data-error="name" role="alert" hidden></p>
       </div>
       <div class="field-grid">
         <div class="field">
           <label for="pf-sku">SKU</label>
-          <input id="pf-sku" data-field="sku" value="${esc(p.sku ?? '')}" maxlength="40" required placeholder="e.g. STP-009">
+          <input id="pf-sku" data-field="sku" value="${esc(sku)}" maxlength="40" required placeholder="e.g. STP-009">
           <p class="field-error" data-error="sku" role="alert" hidden></p>
         </div>
         <div class="field">
           <label for="pf-category">Category</label>
-          <input id="pf-category" data-field="category" value="${esc(p.category ?? '')}" list="pf-categories" maxlength="40" required>
+          <input id="pf-category" data-field="category" value="${esc(category)}" list="pf-categories" maxlength="40" required>
           <datalist id="pf-categories">
             ${CATEGORIES.map((c) => `<option value="${esc(c)}"></option>`).join('')}
           </datalist>
@@ -106,5 +110,27 @@ export function openProductForm({ store, product = null, prefill = {}, onSaved }
   });
 
   content.querySelector('#pf-name').focus();
-  return { close };
+
+  // Fill in a lookup draft (from src/core/productLookup.js). Safe to call at
+  // any time: it no-ops once the modal is gone, only touches EMPTY inputs
+  // (the shop's typed values always win), and reveals the source banner.
+  const applyDraft = (draft) => {
+    if (!content.isConnected || !draft || typeof draft !== 'object') return;
+    const fillIfEmpty = (key, value) => {
+      const input = content.querySelector(`[data-field="${key}"]`);
+      const v = String(value ?? '').trim();
+      if (!input || v === '' || input.value.trim() !== '') return;
+      input.value = v;
+    };
+    fillIfEmpty('name', draft.name);
+    fillIfEmpty('sku', draft.sku);
+    fillIfEmpty('category', draft.category);
+    const note = content.querySelector('[data-lookup-note]');
+    if (note) {
+      note.textContent = `Auto-filled from ${draft.sourceLabel ?? 'a public product database'} — check the details, then set your price and stock.`;
+      note.hidden = false;
+    }
+  };
+
+  return { close, applyDraft };
 }

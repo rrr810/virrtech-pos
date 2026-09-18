@@ -8,6 +8,7 @@ import { searchProducts } from '../core/catalog.js';
 import { cartTotals } from '../core/cart.js';
 import { toast } from './toast.js';
 import { openScanner } from './scanner.js';
+import { lookupBarcode } from '../core/productLookup.js';
 import { openCheckout } from './checkout.js';
 import { openReceiptModal } from './receipt-view.js';
 import { openProductForm } from './catalogue-form.js';
@@ -148,13 +149,33 @@ export function mountRegister(root, { store, onNav }) {
       },
       onUnknown: (code) => {
         // Registration form on top of the scanner; the camera keeps running.
-        openProductForm({
+        // The manual flow is available immediately, before any lookup.
+        const handle = openProductForm({
           store,
           prefill: { barcode: code },
           onSaved: () => {
             toast('Barcode registered — it will be recognised on the next scan.', { type: 'success' });
           },
         });
+        // Online only: quietly ask the public Open Facts databases (food →
+        // beauty → products) for a name/SKU/category draft. Every failure
+        // mode resolves to null, so this can never block or break the form.
+        if (store.state.online) {
+          lookupBarcode(code, {
+            existingSkus: store.state.products.map((p) => p.sku),
+          })
+            .then((draft) => {
+              if (!draft) return;
+              handle.applyDraft(draft);
+              toast(`Found “${draft.name}” in ${draft.sourceLabel} — set your price to save.`, {
+                type: 'success',
+                duration: 5000,
+              });
+            })
+            .catch(() => {
+              /* lookup must never break the manual flow */
+            });
+        }
       },
       onClose: () => {
         scanner = null;
