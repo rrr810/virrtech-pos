@@ -83,7 +83,9 @@ export function mountRegister(root, { store, onNav }) {
 
   function renderCart() {
     const { items } = store.state.cart;
-    cartCount.textContent = items.length > 0 ? `${cartTotals(store.state.cart).count} item${cartTotals(store.state.cart).count === 1 ? '' : 's'}` : 'empty';
+    if (cartCount) {
+      cartCount.textContent = items.length > 0 ? `${cartTotals(store.state.cart).count} item${cartTotals(store.state.cart).count === 1 ? '' : 's'}` : 'empty';
+    }
     if (items.length === 0) {
       cartLines.replaceChildren(el(`<p class="muted cart-empty">Cart is empty.<br>Scan or tap products to start a sale.</p>`));
     } else {

@@ -6,7 +6,7 @@
   "description": "VirrTech Duka POS — offline-first, mobile-first point-of-sale PWA prototype for small Kenyan shops. IndexedDB storage, camera barcode scanning, simulated M-Pesa and card payments.",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test tests/",
+    "test": "node --test 'tests/*.test.js'",
     "build:vendor": "node scripts/build-vendor.mjs",
     "icons": "node scripts/gen-icons.mjs"
   },

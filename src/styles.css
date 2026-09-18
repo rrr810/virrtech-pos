@@ -463,6 +463,20 @@ input, select { font: inherit; color: inherit; }
 }
 .cart-toggle svg { width: 22px; height: 22px; color: var(--indigo); }
 [data-theme='dark'] .cart-toggle svg { color: var(--indigo-strong); }
+.cart-count {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--indigo) 12%, transparent);
+  color: var(--indigo);
+  white-space: nowrap;
+}
+[data-theme='dark'] .cart-count { color: var(--indigo-strong); background: color-mix(in srgb, var(--indigo-strong) 18%, transparent); }
+@media (min-width: 960px) {
+  .cart-count { display: inline-block; }
+}
 .cart-collapsed .cart-body { display: none; }
 .cart-body { border-top: 1px solid var(--line); }
 .cart-lines { max-height: 46vh; overflow-y: auto; }

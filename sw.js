@@ -2,7 +2,7 @@
  * Cache-first for static assets, network-first for the page itself.
  * Bump VERSION on every release to re-precache. */
 
-const VERSION = 'vtduka-v2';
+const VERSION = 'vtduka-v3';
 const ASSETS = [
   '/',
   '/index.html',

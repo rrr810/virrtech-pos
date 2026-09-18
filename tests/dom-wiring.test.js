@@ -1,6 +1,9 @@
 // Catches the main remaining runtime-wiring bug class without a browser:
-// every element id referenced via getElementById in src/ must exist in
-// index.html (shell ids) or be created dynamically by the same module.
+// every element id referenced in src/ — via getElementById, the $() helper
+// or root.querySelector('#id') — must exist in index.html (static shell) or
+// be created as an id="..." inside some src/ module (runtime markup, e.g.
+// modal content). History: a cart badge whose markup was dropped while its
+// JS reference stayed broke app boot with "Cannot set properties of null".
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -23,15 +26,23 @@ function srcFiles(dir) {
   return out;
 }
 
-test('every getElementById target exists in the shell or is created by that module', () => {
+// Ids that appear as id="..." anywhere in module source: markup created at
+// runtime (modals, receipts, dynamic rows) is allowed to be queried.
+const allSrc = srcFiles('src').map((f) => read(f)).join('\n');
+const dynamicIds = new Set([...allSrc.matchAll(/id="([^"$]+?)"/g)].map((m) => m[1]));
+
+test('every id referenced in src/ exists in the shell or is created at runtime', () => {
   for (const f of srcFiles('src')) {
     const source = read(f);
-    const refs = [...source.matchAll(/getElementById\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1]);
+    const refs = new Set();
+    for (const m of source.matchAll(/getElementById\(\s*['"]([^'"]+)['"]\s*\)/g)) refs.add(m[1]);
+    // $() helper and querySelector accept compound selectors — keep only the leading id.
+    for (const m of source.matchAll(/\$\(\s*['"]#([A-Za-z0-9_-]+)/g)) refs.add(m[1]);
+    for (const m of source.matchAll(/querySelector(?:All)?\(\s*['"]#([A-Za-z0-9_-]+)/g)) refs.add(m[1]);
     for (const id of refs) {
-      const createdDynamically = source.includes(`id="${id}"`);
       assert.ok(
-        htmlIds.has(id) || createdDynamically,
-        `${f}: getElementById('${id}') — id missing from index.html and not created in this module`,
+        htmlIds.has(id) || dynamicIds.has(id),
+        `${f}: references #${id} — id missing from index.html and never created as id="${id}" in src/`,
       );
     }
   }
