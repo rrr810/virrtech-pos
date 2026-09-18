@@ -4,7 +4,7 @@
  * a subpath (e.g. GitHub Pages at /virrtech-pos/).
  * Bump VERSION on every release to re-precache. */
 
-const VERSION = 'vtduka-v4';
+const VERSION = 'vtduka-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,7 @@ const ASSETS = [
   './src/core/demo.js',
   './src/core/inventory.js',
   './src/core/money.js',
+  './src/core/productLookup.js',
   './src/core/receipt.js',
   './src/core/refunds.js',
   './src/core/sales.js',
