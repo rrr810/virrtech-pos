@@ -17,6 +17,11 @@ let mounted = new Map();
 let current = null;
 let deferredInstall = null;
 
+function viewFromHash() {
+  const h = (location.hash || '').replace(/^#\/?/, '');
+  return VIEWS.includes(h) ? h : 'register';
+}
+
 function applyTheme(theme) {
   const resolved =
     theme === 'system'
@@ -35,7 +40,7 @@ function setOnline(online) {
   pill.title = online ? 'Connected. All data is still stored locally.' : 'Working offline — sales continue and save on this device.';
 }
 
-function setActiveView(name) {
+function setActiveView(name, { updateHash = true } = {}) {
   if (!VIEWS.includes(name)) name = 'register';
   current = name;
   for (const id of VIEWS) {
@@ -47,6 +52,9 @@ function setActiveView(name) {
     tab.classList.toggle('tab-active', on);
   }
   document.body.dataset.activeView = name;
+  if (updateHash && location.hash !== `#/${name}`) {
+    history.replaceState(null, '', `#/${name}`);
+  }
   if (!mounted.has(name)) {
     const api = { store, onInstall: promptInstall };
     let view;
@@ -119,6 +127,12 @@ function wireShell() {
   });
 
   document.getElementById('install-btn').addEventListener('click', promptInstall);
+
+  // Deep links: #/register, #/catalogue, #/sales, #/dashboard, #/settings
+  window.addEventListener('hashchange', () => {
+    const name = viewFromHash();
+    if (name !== current) setActiveView(name, { updateHash: false });
+  });
 }
 
 function boot() {
@@ -126,7 +140,6 @@ function boot() {
   wireShell();
   applyTheme(store.state.theme);
   setOnline(store.state.online);
-  setActiveView('register');
   document.getElementById('splash').hidden = true;
   if (store.state.demoSeeded) {
     toast('Demo data loaded — reset it anytime from Settings.', { type: 'info', duration: 4200 });
@@ -135,7 +148,10 @@ function boot() {
 
 store
   .init()
-  .then(boot)
+  .then(() => {
+    boot();
+    setActiveView(viewFromHash());
+  })
   .catch((err) => {
     document.getElementById('splash').innerHTML = `
       <div class="splash-error" role="alert">
