@@ -1,0 +1,11 @@
+barcode-decoder.mjs is a minified ESM bundle of:
+
+  @zxing/browser  (https://github.com/zxing-js/browser)
+  @zxing/library  (https://zxing.github.io/zxing-js/)
+
+License: Apache License 2.0 (ZXing-js project).
+
+Regenerate with:  npm install && npm run build:vendor
+
+The bundle is committed so the application runs with no build step and
+without any third-party CDN.
