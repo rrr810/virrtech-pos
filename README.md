@@ -45,6 +45,17 @@ npm test             # 74 automated tests (node:test + happy-dom, zero test fram
 npm start            # http://localhost:8080  (PORT=3000 to override)
 ```
 
+### Publishing with GitHub Pages (one-time)
+
+All asset paths are relative, so the app works when served from a subpath.
+
+1. Merge the app branch into `main` (or pick the branch directly in step 2).
+2. Repo **Settings → Pages → Source: Deploy from a branch** → choose the
+   branch and `/ (root)` → **Save**.
+3. After a minute the site serves at `https://<user>.github.io/virrtech-pos/`
+   — https is what enables phone camera scanning and PWA install.
+
+
 Open http://localhost:8080 in a phone or desktop browser. Demo data loads on
 first run; reset it anytime from **Settings → Demo data**.
 
