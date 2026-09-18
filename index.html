@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en-KE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="VirrTech Duka POS — an offline-first point of sale prototype for small Kenyan shops. Demo data, simulated payments, not KRA eTIMS certified.">
+  <meta name="theme-color" content="#F7F5F0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; manifest-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'">
+  <title>VirrTech Duka POS</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="src/styles.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Duka POS">
+</head>
+<body>
+  <div id="splash" class="splash" role="status" aria-live="polite">
+    <div class="splash-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="56" height="56" fill="none">
+        <rect x="4" y="4" width="56" height="56" rx="14" fill="var(--indigo)"/>
+        <path d="M20 24l12 22 12-22" stroke="var(--teal)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="splash-title">VirrTech Duka POS</p>
+    <p class="splash-sub">Loading the duka…</p>
+  </div>
+
+  <header class="topbar">
+    <span class="brand" aria-label="VirrTech Duka POS">
+      <svg class="brand-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+        <rect x="4" y="4" width="56" height="56" rx="14" fill="var(--indigo)"/>
+        <path d="M20 24l12 22 12-22" stroke="var(--teal)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-name">VirrTech Duka</span>
+        <span class="brand-sub">Point of Sale</span>
+      </span>
+    </span>
+    <div class="topbar-actions">
+      <span id="net-status" class="net-pill" data-state="online" title="Connected. All data is still stored locally.">
+        <span class="net-dot" aria-hidden="true"></span><span class="net-txt">Online</span>
+      </span>
+      <button type="button" id="install-btn" class="btn btn-ghost btn-sm" hidden>Install app</button>
+      <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav id="nav" class="tabbar" aria-label="Main sections">
+    <button type="button" class="tab" data-nav="register" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 9v6M11 9v6M15 9v6M18 9v6"/></svg>
+      <span>Register</span>
+    </button>
+    <button type="button" class="tab" data-nav="catalogue" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      <span>Catalogue</span>
+    </button>
+    <button type="button" class="tab" data-nav="sales" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4L10 21l-2-1.4L6 21V3z"/><path d="M9.5 8.5h5M9.5 12h5" stroke-linecap="round"/></svg>
+      <span>Sales</span>
+    </button>
+    <button type="button" class="tab" data-nav="dashboard" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-6M21 20H3"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button type="button" class="tab" data-nav="settings" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h9M19 8h1M4 16h1M11 16h9"/><circle cx="16" cy="8" r="2.2"/><circle cx="8" cy="16" r="2.2"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <main id="main">
+    <!-- ========================================================= REGISTER -->
+    <section id="view-register" class="view" aria-label="Register">
+      <div class="register-top">
+        <div class="search-row">
+          <div class="search-box">
+            <input id="reg-search" type="search" autocomplete="off" enterkeyhint="search"
+                   placeholder="Search name, SKU or type a barcode…"
+                   aria-label="Search products by name, SKU or barcode">
+          </div>
+          <button type="button" id="reg-scan" class="btn btn-primary btn-scan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 9v6M11 9v6M15 9v6M18 9v6"/></svg>
+            <span>Scan</span>
+          </button>
+        </div>
+        <p id="reg-hint" class="muted small" aria-live="polite"></p>
+      </div>
+      <div class="register-body">
+        <div id="reg-results" class="product-grid" aria-label="Products"></div>
+        <aside id="reg-cart" class="cart-panel" aria-label="Shopping cart">
+          <button type="button" id="cart-toggle" class="cart-toggle" aria-expanded="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.6 12.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6"/></svg>
+            <span id="cart-toggle-text">Cart is empty</span>
+            <span id="cart-count" class="cart-count" aria-hidden="true"></span>
+          </button>
+          <div class="cart-body">
+            <div id="cart-lines" class="cart-lines"></div>
+            <footer class="cart-footer">
+              <div class="cart-total-row">
+                <span>Total</span><strong id="cart-total">KSh 0</strong>
+              </div>
+              <button type="button" id="checkout-btn" class="btn btn-teal btn-lg" disabled>Checkout</button>
+              <button type="button" id="clear-cart" class="btn btn-ghost btn-sm" disabled>Clear cart</button>
+            </footer>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ======================================================= CATALOGUE -->
+    <section id="view-catalogue" class="view" aria-label="Catalogue" hidden>
+      <header class="view-head">
+        <h2>Catalogue <span id="cat-count" class="count-pill">0</span></h2>
+        <button type="button" class="btn btn-primary" data-new-product>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New product</span>
+        </button>
+      </header>
+      <div class="search-row">
+        <div class="search-box">
+          <input id="cat-search" type="search" autocomplete="off" placeholder="Search name, SKU or barcode…" aria-label="Search catalogue">
+        </div>
+      </div>
+      <div id="cat-list" class="card-list"></div>
+      <section class="mov-section" aria-label="Stock movement history">
+        <h3>Stock movement history <span class="muted small">(latest 40)</span></h3>
+        <ul id="mov-list" class="mov-list"></ul>
+      </section>
+    </section>
+
+    <!-- =========================================================== SALES -->
+    <section id="view-sales" class="view" aria-label="Sales history" hidden>
+      <header class="view-head">
+        <h2>Sales</h2>
+      </header>
+      <div id="sales-filters" class="chip-row" role="group" aria-label="Sales period">
+        <button type="button" class="chip chip-filter chip-active" data-filter="today">Today</button>
+        <button type="button" class="chip chip-filter" data-filter="7d">Last 7 days</button>
+        <button type="button" class="chip chip-filter" data-filter="all">All</button>
+      </div>
+      <p id="sales-summary" class="sales-summary muted" aria-live="polite"></p>
+      <div id="sales-list" class="sale-list"></div>
+    </section>
+
+    <!-- ======================================================= DASHBOARD -->
+    <section id="view-dashboard" class="view" aria-label="Daily sales dashboard" hidden>
+      <header class="view-head">
+        <h2>Daily sales</h2>
+        <span id="dash-date" class="muted"></span>
+      </header>
+      <div id="dash-stats" class="stat-grid" aria-label="Today at a glance"></div>
+      <section class="panel" aria-label="Payment methods today">
+        <h3>Payment methods <span class="muted small">· today</span></h3>
+        <div id="dash-payments" class="pay-rows"></div>
+      </section>
+      <section class="panel" aria-label="Best sellers today">
+        <h3>Best sellers <span class="muted small">· today</span></h3>
+        <ol id="dash-top" class="top-list"></ol>
+      </section>
+      <section class="panel" aria-label="Sales by hour">
+        <h3>By hour <span class="muted small">· today</span></h3>
+        <div id="dash-hours" class="hour-bars"></div>
+      </section>
+      <section class="panel" aria-label="Last seven days">
+        <h3>Last 7 days</h3>
+        <div class="table-wrap">
+          <table id="dash-week" class="data-table">
+            <thead>
+              <tr><th scope="col">Day</th><th scope="col">Sales</th><th scope="col">Gross</th><th scope="col">Refunded</th></tr>
+            </thead>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================== SETTINGS -->
+    <section id="view-settings" class="view" aria-label="Settings" hidden>
+      <header class="view-head"><h2>Settings</h2></header>
+
+      <section class="panel">
+        <h3>Shop details <span class="muted small">· shown on receipts</span></h3>
+        <form id="shop-form" novalidate>
+          <div class="field">
+            <label for="shop-name">Shop name</label>
+            <input id="shop-name" maxlength="60" required>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="shop-location">Location</label>
+              <input id="shop-location" maxlength="80" placeholder="e.g. Eldoret, Kenya">
+            </div>
+            <div class="field">
+              <label for="shop-phone">Phone</label>
+              <input id="shop-phone" inputmode="tel" maxlength="20" placeholder="e.g. 0700 000 000">
+            </div>
+          </div>
+          <p id="shop-error" class="field-error" role="alert" hidden></p>
+          <div class="row"><button type="submit" class="btn btn-primary">Save shop details</button></div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h3>Appearance</h3>
+        <div class="theme-row" role="radiogroup" aria-label="Theme">
+          <label class="theme-opt"><input type="radio" name="theme" data-theme-radio="system" value="system"><span>System</span></label>
+          <label class="theme-opt"><input type="radio" name="theme" data-theme-radio="light" value="light"><span>Light</span></label>
+          <label class="theme-opt"><input type="radio" name="theme" data-theme-radio="dark" value="dark"><span>Dark</span></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Demo data</h3>
+        <p id="demo-status" class="muted small" aria-live="polite"></p>
+        <div class="row">
+          <button type="button" id="load-demo" class="btn btn-ghost">Reset &amp; load demo data</button>
+          <button type="button" id="install-app" class="btn btn-ghost">Install app</button>
+        </div>
+      </section>
+
+      <section class="panel about-panel">
+        <h3>About</h3>
+        <p>VirrTech Duka POS <strong>v0.1.0</strong> — a <strong>prototype</strong> point of sale for small Kenyan shops. All data lives in this browser (IndexedDB); payments are <strong>simulated</strong> and no real money moves.</p>
+        <p class="disclaimer">
+          This prototype is <strong>not KRA eTIMS certified</strong> and must not be used for real tax reporting.
+          M-Pesa and card steps are on-screen simulations — no provider APIs or credentials are used.
+          Currency is the Kenyan Shilling (KSh), locale <code>en-KE</code>, demo location Eldoret, Kenya.
+        </p>
+      </section>
+    </section>
+  </main>
+
+  <div id="print-root" aria-hidden="true"></div>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-label="Notifications"></div>
+  <noscript>
+    <div class="noscript">VirrTech Duka POS needs JavaScript enabled to run.</div>
+  </noscript>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
