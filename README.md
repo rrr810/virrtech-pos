@@ -41,7 +41,7 @@ runs in any modern browser.
 
 ```bash
 npm install          # dev deps only (ZXing + esbuild, used to regenerate the vendored decoder)
-npm test             # 66 automated tests (node:test, zero test frameworks)
+npm test             # 74 automated tests (node:test + happy-dom, zero test frameworks)
 npm start            # http://localhost:8080  (PORT=3000 to override)
 ```
 
@@ -147,7 +147,8 @@ src/
                         settings + modals, toasts, checkout, scanner, receipt
 tests/                  node:test suites — core rules, store integration
                         (full checkout/refund/reset flows over an in-memory
-                        IndexedDB shim), static wiring and DOM id checks
+                        IndexedDB shim), static wiring, DOM id checks, and a
+                        happy-dom boot test that drives the real UI
 tests/helpers/fake-idb.js  tiny in-memory IndexedDB for the integration tests
 docs/architecture.md    architecture, data model, API/Postgres mapping
 ```

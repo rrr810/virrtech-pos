@@ -1,45 +1,47 @@
 /* VirrTech Duka POS — service worker (offline app shell).
  * Cache-first for static assets, network-first for the page itself.
+ * All paths are relative to this file so the app also works when served from
+ * a subpath (e.g. GitHub Pages at /virrtech-pos/).
  * Bump VERSION on every release to re-precache. */
 
-const VERSION = 'vtduka-v3';
+const VERSION = 'vtduka-v4';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/src/main.js',
-  '/src/styles.css',
-  '/src/core/money.js',
-  '/src/core/barcodes.js',
-  '/src/core/catalog.js',
-  '/src/core/cart.js',
-  '/src/core/checkout.js',
-  '/src/core/refunds.js',
-  '/src/core/inventory.js',
-  '/src/core/receipt.js',
-  '/src/core/sales.js',
-  '/src/core/demo.js',
-  '/src/state/db.js',
-  '/src/state/store.js',
-  '/src/ui/dom.js',
-  '/src/ui/toast.js',
-  '/src/ui/modal.js',
-  '/src/ui/receipt-view.js',
-  '/src/ui/scanner.js',
-  '/src/ui/checkout.js',
-  '/src/ui/register.js',
-  '/src/ui/catalogue.js',
-  '/src/ui/catalogue-form.js',
-  '/src/ui/sales.js',
-  '/src/ui/dashboard.js',
-  '/src/ui/settings.js',
-  '/src/scanner/engine.js',
-  '/vendor/barcode-decoder.mjs',
-  '/icons/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-180.png',
-  '/icons/maskable-512.png',
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './src/styles.css',
+  './vendor/barcode-decoder.mjs',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-180.png',
+  './icons/maskable-512.png',
+  './src/core/barcodes.js',
+  './src/core/cart.js',
+  './src/core/catalog.js',
+  './src/core/checkout.js',
+  './src/core/demo.js',
+  './src/core/inventory.js',
+  './src/core/money.js',
+  './src/core/receipt.js',
+  './src/core/refunds.js',
+  './src/core/sales.js',
+  './src/main.js',
+  './src/scanner/engine.js',
+  './src/state/db.js',
+  './src/state/store.js',
+  './src/ui/catalogue-form.js',
+  './src/ui/catalogue.js',
+  './src/ui/checkout.js',
+  './src/ui/dashboard.js',
+  './src/ui/dom.js',
+  './src/ui/modal.js',
+  './src/ui/receipt-view.js',
+  './src/ui/register.js',
+  './src/ui/sales.js',
+  './src/ui/scanner.js',
+  './src/ui/settings.js',
+  './src/ui/toast.js',
 ];
 
 self.addEventListener('install', (event) => {
@@ -65,6 +67,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  const INDEX = new URL('index.html', self.location).href;
 
   // Navigations: network first so a fresh deploy wins, cache as offline fallback.
   if (req.mode === 'navigate') {
@@ -72,10 +75,10 @@ self.addEventListener('fetch', (event) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(VERSION).then((cache) => cache.put('/index.html', copy));
+          caches.open(VERSION).then((cache) => cache.put(INDEX, copy));
           return res;
         })
-        .catch(() => caches.match('/index.html')),
+        .catch(() => caches.match(INDEX)),
     );
     return;
   }

@@ -76,10 +76,10 @@ export function openProductForm({ store, product = null, prefill = {}, onSaved }
   };
 
   content.querySelector('[data-cancel]').addEventListener('click', () => close());
-  content.addEventListener('submit', (e) => {
+  content.addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = (key) => content.querySelector(`[data-field="${key}"]`).value;
-    const res = store.upsertProduct(
+    const res = await store.upsertProduct(
       {
         name: input('name'),
         sku: input('sku'),

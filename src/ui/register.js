@@ -67,10 +67,10 @@ export function mountRegister(root, { store, onNav }) {
     );
   }
 
-  function addProduct(target, { silent = false } = {}) {
-    const res = store.addToCart(target, 1);
+  async function addProduct(target, { silent = false } = {}) {
+    const res = await store.addToCart(target, 1);
     if (!res.ok) {
-      toast(res.error, { type: 'error' });
+      toast(res.error ?? 'Could not add to cart.', { type: 'error' });
       return null;
     }
     const product = store.resolveProduct(target);
@@ -134,15 +134,17 @@ export function mountRegister(root, { store, onNav }) {
         lastScanned = { code, at: now };
         const product = store.findByBarcode(code);
         if (!product) return false;
-        const res = store.addToCart(product.id, 1);
-        if (!res.ok) {
-          toast(res.error, { type: 'error' });
-          return true; // recognised, but could not add (stock)
-        }
-        toast(`${product.name} added`, { type: 'success', duration: 1400 });
-        renderCart();
-        renderGrid();
-        return true;
+        // The scanner contract is synchronous; run the async add and let the
+        // result surface through the store's own render subscription.
+        store.addToCart(product.id, 1).then((res) => {
+          if (!res.ok) {
+            toast(res.error ?? 'Could not add to cart.', { type: 'error' });
+            return;
+          }
+          toast(`${product.name} added`, { type: 'success', duration: 1400 });
+          renderGrid();
+        });
+        return true; // recognised — handled
       },
       onUnknown: (code) => {
         // Registration form on top of the scanner; the camera keeps running.
@@ -191,8 +193,9 @@ export function mountRegister(root, { store, onNav }) {
     if (inc) {
       const line = store.state.cart.items.find((i) => i.productId === inc.dataset.inc);
       if (line) {
-        const res = store.setCartQty(line.productId, line.qty + 1);
-        if (!res.ok) toast(res.error, { type: 'error' });
+        store.setCartQty(line.productId, line.qty + 1).then((res) => {
+          if (!res.ok) toast(res.error ?? 'Cannot add more than the available stock.', { type: 'error' });
+        });
       }
       return;
     }

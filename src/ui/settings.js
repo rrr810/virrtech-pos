@@ -20,10 +20,10 @@ export function mountSettings(root, { store, onInstall }) {
       : 'No data loaded';
   }
 
-  shopForm.addEventListener('submit', (e) => {
+  shopForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     shopError.hidden = true;
-    const res = store.setShop({
+    const res = await store.setShop({
       name: root.querySelector('#shop-name').value,
       location: root.querySelector('#shop-location').value,
       phone: root.querySelector('#shop-phone').value,

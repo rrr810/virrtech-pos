@@ -8,10 +8,10 @@
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; manifest-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'">
   <title>VirrTech Duka POS</title>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/icons/icon-180.png">
-  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="src/styles.css">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Duka POS">
@@ -41,7 +41,7 @@
     </span>
     <div class="topbar-actions">
       <span id="net-status" class="net-pill" data-state="online" title="Connected. All data is still stored locally.">
-        <span class="net-dot" aria-hidden="true"></span><span>Online</span>
+        <span class="net-dot" aria-hidden="true"></span><span class="net-txt">Online</span>
       </span>
       <button type="button" id="install-btn" class="btn btn-ghost btn-sm" hidden>Install app</button>
       <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle light and dark theme" title="Toggle theme">
@@ -240,6 +240,6 @@
   <noscript>
     <div class="noscript">VirrTech Duka POS needs JavaScript enabled to run.</div>
   </noscript>
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>

@@ -11,21 +11,23 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..'));
 const read = (p) => readFileSync(join(root, p), 'utf8');
 
-test('index.html references exist on disk', () => {
+test('index.html references exist on disk and are relative (subpath-safe)', () => {
   const html = read('index.html');
   const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]);
   assert.ok(refs.length >= 5, 'expected several asset references');
   for (const ref of refs) {
     if (ref.startsWith('http') || ref.startsWith('#') || ref.startsWith('data:')) continue;
+    assert.ok(!ref.startsWith('/'), `absolute path breaks Pages subpath deploy: ${ref}`);
     const path = ref.startsWith('/') ? ref.slice(1) : ref;
     assert.ok(existsSync(join(root, path)), `missing asset referenced by index.html: ${ref}`);
   }
 });
 
-test('manifest icons and start_url exist', () => {
+test('manifest icons and start_url exist (relative for subpath deploys)', () => {
   const manifest = JSON.parse(read('manifest.webmanifest'));
   assert.equal(manifest.name, 'VirrTech Duka POS');
-  assert.equal(manifest.start_url, '/');
+  assert.equal(manifest.start_url, './', 'start_url must stay relative so Pages subpaths work');
+  assert.equal(manifest.scope, './');
   assert.ok(manifest.icons.length >= 3);
   const sizes = manifest.icons.map((i) => i.sizes);
   assert.ok(sizes.includes('192x192'));
@@ -33,7 +35,8 @@ test('manifest icons and start_url exist', () => {
   const maskable = manifest.icons.find((i) => i.purpose === 'maskable');
   assert.ok(maskable, 'manifest needs a maskable icon');
   for (const icon of manifest.icons) {
-    assert.ok(existsSync(join(root, icon.src.slice(1))), `missing icon: ${icon.src}`);
+    assert.ok(!icon.src.startsWith('/'), `icon src must be relative: ${icon.src}`);
+    assert.ok(existsSync(join(root, icon.src)), `missing icon: ${icon.src}`);
   }
 });
 
@@ -56,12 +59,29 @@ test('generated PNGs are valid (signature + dimensions)', () => {
 
 test('service worker precache list matches the module graph on disk', () => {
   const sw = read('sw.js');
-  const assets = [...sw.matchAll(/'([^']+\.js|[^']+\.mjs|[^']+\.css|\/index\.html|\/)'/g)].map((m) => m[1]);
+  const block = sw.match(/const ASSETS = \[([\s\S]*?)\];/);
+  assert.ok(block, 'ASSETS array not found in sw.js');
+  const assets = [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
   assert.ok(assets.length >= 30, 'expected a full precache list');
+  assert.ok(assets.includes('./'), 'precache must include the app root');
   for (const a of assets) {
-    if (a === '/') continue;
-    const path = a.startsWith('/') ? a.slice(1) : a;
-    assert.ok(existsSync(join(root, path)), `sw.js precaches missing file: ${a}`);
+    // Relative-only so the same build works at / and /virrtech-pos/.
+    assert.ok(a.startsWith('./'), `sw asset must be relative to the sw scope: ${a}`);
+    if (a === './') continue;
+    assert.ok(existsSync(join(root, a.slice(2))), `sw.js precaches missing file: ${a}`);
+  }
+  // Every src module must be precached, or offline mode serves stale code.
+  const jsModules = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(join(root, dir))) {
+      const full = join(dir, entry);
+      if (statSync(join(root, full)).isDirectory()) walk(full);
+      else if (entry.endsWith('.js')) jsModules.push(`./${full.replace(/\\/g, '/')}`);
+    }
+  };
+  walk('src');
+  for (const m of jsModules) {
+    assert.ok(assets.includes(m), `sw.js must precache module: ${m}`);
   }
 });
 

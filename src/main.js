@@ -36,7 +36,8 @@ function setOnline(online) {
   const pill = document.getElementById('net-status');
   if (!pill) return;
   pill.dataset.state = online ? 'online' : 'offline';
-  pill.querySelector('span').textContent = online ? 'Online' : 'Offline';
+  const txt = pill.querySelector('.net-txt');
+  if (txt) txt.textContent = online ? 'Online' : 'Offline';
   pill.title = online ? 'Connected. All data is still stored locally.' : 'Working offline — sales continue and save on this device.';
 }
 
@@ -169,7 +170,7 @@ window.addEventListener('unhandledrejection', (e) => {
 // Service worker: register only in supported, secure contexts.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register('sw.js').catch(() => {
       /* offline caching unavailable; app still works online */
     });
   });
